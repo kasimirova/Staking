@@ -1,1 +1,3 @@
-Contract address - 0xB26D5EE38be3158154aA248429f7442803bcbb0b
+Contract address - 0xe5f5Fa7d632e6928f042Bf8282d2A5a36A69be95
+LP token address - 0x27042989f2b820c91e1d875f355bf32468004eeb
+Reward token address - 0x13CCc98ad55B0c5b24108a592bE286240eC03D94

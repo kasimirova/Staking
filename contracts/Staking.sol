@@ -18,7 +18,7 @@ contract Staking {
     uint8 percent;
 
     constructor(address _lpToken, address _rewardToken, uint256 _freezingTimeForLP, uint256 _rewardTime, uint8 _percent) {
-        ownerAddress = payable(msg.sender);
+        ownerAddress = msg.sender;
         lpToken = _lpToken;
         rewardToken = _rewardToken;
         freezingTimeForLP = _freezingTimeForLP;
