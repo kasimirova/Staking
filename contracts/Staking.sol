@@ -7,7 +7,7 @@ contract Staking {
         uint256 amountofStakedLPTokens;
         uint256 timeOfStake;
         uint256 rewardDebt;
-        bool isRewardReceived;
+        uint256 freezeUntil;
     }
 
     mapping (address => userInfo) public user;
@@ -38,22 +38,20 @@ contract Staking {
         }
         user[msg.sender].amountofStakedLPTokens+=amount;
         user[msg.sender].timeOfStake = block.timestamp;
-        user[msg.sender].isRewardReceived = false;
+        user[msg.sender].freezeUntil = block.timestamp + freezingTimeForLP;
         IERC20(lpToken).transferFrom(msg.sender, address(this), amount);
     }
 
     function claim() external{
         IERC20(rewardToken).transfer(msg.sender, countReward(msg.sender)+user[msg.sender].rewardDebt);
-        user[msg.sender].isRewardReceived=true;
+        user[msg.sender].timeOfStake = block.timestamp;
         user[msg.sender].rewardDebt=0;
     }
 
     function unstake() external{
-        require(block.timestamp - user[msg.sender].timeOfStake >= freezingTimeForLP, "It's too soon to unstake");
+        require(block.timestamp >= user[msg.sender].freezeUntil, "It's too soon to unstake");
         IERC20(lpToken).transfer(msg.sender, user[msg.sender].amountofStakedLPTokens);
-        if (!user[msg.sender].isRewardReceived){ 
-            user[msg.sender].rewardDebt+=countReward(msg.sender);
-        }      
+        user[msg.sender].rewardDebt+=countReward(msg.sender);      
         user[msg.sender].amountofStakedLPTokens = 0;
     }
     
