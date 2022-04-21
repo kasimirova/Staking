@@ -26,7 +26,7 @@ describe("Staking", function () {
 
   it("Stake", async function () {
     await lp.transfer(addr1.address, ethers.utils.parseEther("500"));
-    await lp.connect(addr1).approve(staking.address, ethers.utils.parseEther("60"));
+    await lp.connect(addr1).approve(staking.address, ethers.utils.parseEther("80"));
     await staking.connect(addr1).stake(ethers.utils.parseEther("50"));
     expect(await lp.balanceOf(addr1.address)).to.equal(ethers.utils.parseEther("450"));
     expect(await lp.balanceOf(staking.address)).to.equal(ethers.utils.parseEther("50"));
@@ -44,7 +44,6 @@ describe("Staking", function () {
     await staking.connect(addr1).stake(ethers.utils.parseEther("10"));
     expect(await staking.getRewardDebt(addr1.address)).to.equal(ethers.utils.parseEther("20"));
     expect(await lp.balanceOf(staking.address)).to.equal(ethers.utils.parseEther("60"));  
-
   }
   );
 
@@ -57,6 +56,44 @@ describe("Staking", function () {
     expect(await staking.getAmountofStakedTokens(addr1.address)).to.equal(ethers.utils.parseEther("60")); 
   }
   );
+  
+  it("Unstake", async function () {
+    await staking.connect(addr1).unstake();
+    expect(await lp.balanceOf(addr1.address)).to.equal(ethers.utils.parseEther("500"));
+  }
+  );
+
+  it("Claim", async function () {   
+    await reward.transfer(staking.address, ethers.utils.parseEther("70"));
+    await provider.send("evm_increaseTime", [2400]);
+    await provider.send("evm_mine");
+    await staking.connect(addr1).claim();
+    expect(await reward.balanceOf(addr1.address)).to.equal(ethers.utils.parseEther("56"));  
+    expect(await staking.getAmountofStakedTokens(addr1.address)).to.equal(ethers.utils.parseEther("0")); 
+  }
+  );
+
+  it("Stake", async function () {
+    await staking.connect(addr1).stake(ethers.utils.parseEther("20"));
+    expect(await lp.balanceOf(addr1.address)).to.equal(ethers.utils.parseEther("480"));
+    expect(await lp.balanceOf(staking.address)).to.equal(ethers.utils.parseEther("20"));
+    await provider.send("evm_increaseTime", [1810]);//+ 30 min 10 sec
+    await provider.send("evm_mine");  
+  }
+  );
+
+  it("Unstake", async function () {
+    await staking.connect(addr1).unstake();
+    expect(await lp.balanceOf(addr1.address)).to.equal(ethers.utils.parseEther("500"));
+  }
+  );
+
+  it("Claim", async function () {   
+    await staking.connect(addr1).claim();
+    expect(await reward.balanceOf(addr1.address)).to.equal(ethers.utils.parseEther("68"));  
+    expect(await staking.getAmountofStakedTokens(addr1.address)).to.equal(ethers.utils.parseEther("0")); 
+  }
+  );
 
   it("Unstake", async function () {
     await staking.connect(addr1).unstake();
@@ -66,7 +103,6 @@ describe("Staking", function () {
 
   it("Set reward time as not an owner", async function () {
     await expect(staking.connect(addr1).setRewardTime(900)).to.be.revertedWith("Sender is not an owner");
-
   }
   );
 
